@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>إدارة المعرض</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:'Cairo',sans-serif;
+    background:#f4f6fa;
+    color:#172033;
+}
+
+button,
+input,
+textarea,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.login{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:
+        radial-gradient(circle at 20% 20%,#334155,transparent 35%),
+        linear-gradient(135deg,#0f172a,#1e3a8a);
+}
+
+.login-box{
+    width:min(430px,100%);
+    background:white;
+    padding:35px;
+    border-radius:28px;
+    box-shadow:0 30px 80px rgba(0,0,0,.3);
+    text-align:center;
+}
+
+.login-icon{
+    width:70px;
+    height:70px;
+    border-radius:22px;
+    background:#eef2ff;
+    display:grid;
+    place-items:center;
+    font-size:32px;
+    margin:0 auto 18px;
+}
+
+.login h1{
+    margin:0 0 7px;
+}
+
+.login p{
+    color:#64748b;
+    font-size:13px;
+    margin-bottom:25px;
+}
+
+.field{
+    margin-bottom:15px;
+}
+
+.field label{
+    display:block;
+    font-size:13px;
+    font-weight:800;
+    margin-bottom:7px;
+}
+
+.field input,
+.field textarea,
+.field select{
+    width:100%;
+    border:1px solid #dfe5ee;
+    border-radius:13px;
+    padding:12px 13px;
+    outline:none;
+    background:white;
+}
+
+.field textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus{
+    border-color:#1e3a8a;
+}
+
+.primary{
+    border:0;
+    background:#1e3a8a;
+    color:white;
+    border-radius:13px;
+    padding:12px 20px;
+    font-weight:800;
+}
+
+.secondary{
+    border:1px solid #dbe2ec;
+    background:white;
+    color:#334155;
+    border-radius:12px;
+    padding:10px 15px;
+    font-weight:700;
+}
+
+.danger{
+    border:0;
+    background:#fee2e2;
+    color:#b91c1c;
+    border-radius:10px;
+    padding:8px 12px;
+    font-weight:700;
+}
+
+.app{
+    display:none;
+}
+
+.topbar{
+    background:#111827;
+    color:white;
+    padding:15px 25px;
+    position:sticky;
+    top:0;
+    z-index:20;
+}
+
+.topbar-inner{
+    max-width:1400px;
+    margin:auto;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.brand{
+    font-weight:900;
+    font-size:20px;
+}
+
+.top-actions{
+    display:flex;
+    gap:8px;
+}
+
+.top-actions a,
+.logout{
+    border:1px solid rgba(255,255,255,.15);
+    color:white;
+    background:rgba(255,255,255,.08);
+    padding:9px 13px;
+    border-radius:11px;
+    text-decoration:none;
+    font-size:12px;
+}
+
+.layout{
+    max-width:1400px;
+    margin:auto;
+    padding:25px;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:22px;
+}
+
+.panel{
+    background:white;
+    border:1px solid #e6eaf0;
+    border-radius:22px;
+    padding:23px;
+    box-shadow:0 5px 20px rgba(15,23,42,.03);
+}
+
+.panel.full{
+    grid-column:1/-1;
+}
+
+.panel-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.panel-title h2{
+    margin:0;
+    font-size:20px;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:13px;
+}
+
+.actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.category-list{
+    display:grid;
+    gap:9px;
+}
+
+.category-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    border:1px solid #e7ebf1;
+    padding:11px;
+    border-radius:13px;
+}
+
+.category-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.category-icon{
+    font-size:23px;
+}
+
+.listings{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.listing-card{
+    border:1px solid #e6eaf0;
+    border-radius:17px;
+    overflow:hidden;
+    background:white;
+}
+
+.listing-image{
+    height:170px;
+    background:#e9eef5;
+}
+
+.listing-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.listing-info{
+    padding:14px;
+}
+
+.listing-info h3{
+    margin:0 0 6px;
+    font-size:16px;
+}
+
+.muted{
+    color:#64748b;
+    font-size:12px;
+}
+
+.file-area{
+    border:2px dashed #d9e0eb;
+    border-radius:15px;
+    padding:17px;
+    text-align:center;
+    background:#fafbfd;
+}
+
+.file-area input{
+    margin-top:10px;
+}
+
+.preview-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+    margin-top:12px;
+}
+
+.preview{
+    position:relative;
+    height:100px;
+    border-radius:10px;
+    overflow:hidden;
+    background:#e2e8f0;
+}
+
+.preview img,
+.preview video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.remove-preview{
+    position:absolute;
+    top:5px;
+    left:5px;
+    width:27px;
+    height:27px;
+    border:0;
+    border-radius:50%;
+    background:rgba(0,0,0,.7);
+    color:white;
+}
+
+.status{
+    display:none;
+    padding:11px 14px;
+    border-radius:12px;
+    margin-bottom:15px;
+    font-size:13px;
+    font-weight:700;
+}
+
+.status.show{
+    display:block;
+}
+
+.status.ok{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.status.error{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+@media(max-width:1000px){
+    .grid{
+        grid-template-columns:1fr;
+    }
+
+    .panel.full{
+        grid-column:auto;
+    }
+
+    .listings{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .layout{
+        padding:14px;
+    }
+
+    .row{
+        grid-template-columns:1fr;
+    }
+
+    .listings{
+        grid-template-columns:1fr;
+    }
+
+    .preview-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<section id="loginPage" class="login">
+
+    <div class="login-box">
+
+        <div class="login-icon">🔐</div>
+
+        <h1>إدارة المعرض</h1>
+
+        <p>
+            ادخل كلمة المرور للوصول إلى لوحة التحكم
+        </p>
+
+        <div class="field">
+            <input
+                id="password"
+                type="password"
+                placeholder="كلمة المرور"
+                onkeydown="if(event.key==='Enter') login()"
+            >
+        </div>
+
+        <button
+            class="primary"
+            style="width:100%"
+            onclick="login()"
+        >
+            دخول لوحة التحكم
+        </button>
+
+    </div>
+
+</section>
+
+<section id="app" class="app">
+
+<header class="topbar">
+
+    <div class="topbar-inner">
+
+        <div class="brand">
+            ✦ إدارة المعرض
+        </div>
+
+        <div class="top-actions">
+
+            <a href="/" target="_blank">
+                👁️ المعرض
+            </a>
+
+            <button
+                class="logout"
+                onclick="logout()"
+            >
+                خروج
+            </button>
+
+        </div>
+
+    </div>
+
+</header>
+
+<main class="layout">
+
+<div id="status" class="status"></div>
+
+<div class="grid">
+
+<!-- الإعدادات -->
+
+<section class="panel">
+
+    <div class="panel-title">
+        <h2>⚙️ بيانات المعرض</h2>
+    </div>
+
+    <div class="field">
+        <label>اسم المعرض</label>
+        <input id="settingName">
+    </div>
+
+    <div class="field">
+        <label>وصف المعرض</label>
+        <textarea id="settingDescription"></textarea>
+    </div>
+
+    <div class="row">
+
+        <div class="field">
+            <label>واتساب المدير</label>
+            <input
+                id="settingWhatsapp"
+                placeholder="9677xxxxxxxx"
+            >
+        </div>
+
+        <div class="field">
+            <label>رقم الهاتف</label>
+            <input
+                id="settingPhone"
+            >
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="field">
+            <label>البريد الإلكتروني</label>
+            <input
+                id="settingEmail"
+                type="email"
+            >
+        </div>
+
+        <div class="field">
+            <label>الموقع الإلكتروني</label>
+            <input
+                id="settingWebsite"
+                placeholder="example.com"
+            >
+        </div>
+
+    </div>
+
+    <button
+        class="primary"
+        onclick="saveSettings()"
+    >
+        حفظ بيانات المعرض
+    </button>
+
+</section>
+
+<!-- التصنيفات -->
+
+<section class="panel">
+
+    <div class="panel-title">
+        <h2>📂 التصنيفات</h2>
+    </div>
+
+    <div class="row">
+
+        <div class="field">
+            <label>اسم التصنيف</label>
+            <input id="categoryName">
+        </div>
+
+        <div class="field">
+            <label>الأيقونة</label>
+            <input
+                id="categoryIcon"
+                placeholder="🏠"
+            >
+        </div>
+
+    </div>
+
+    <div class="actions">
+        <button
+            class="primary"
+            onclick="saveCategory()"
+        >
+            إضافة تصنيف
+        </button>
+
+        <button
+            id="cancelCategory"
+            class="secondary"
+            style="display:none"
+            onclick="cancelCategoryEdit()"
+        >
+            إلغاء
+        </button>
+    </div>
+
+    <div
+        id="categoryList"
+        class="category-list"
+        style="margin-top:17px"
+    ></div>
+
+</section>
+
+<!-- إضافة / تعديل -->
+
+<section class="panel full">
+
+    <div class="panel-title">
+
+        <h2 id="formTitle">
+            ➕ إضافة إعلان جديد
+        </h2>
+
+        <button
+            class="secondary"
+            onclick="resetForm()"
+        >
+            إعلان جديد
+        </button>
+
+    </div>
+
+    <input id="listingId" type="hidden">
+
+    <div class="row">
+
+        <div class="field">
+            <label>اسم الإعلان *</label>
+            <input
+                id="listingTitle"
+                placeholder="مثال: منزل للبيع في..."
+            >
+        </div>
+
+        <div class="field">
+            <label>التصنيف *</label>
+            <select id="listingCategory"></select>
+        </div>
+
+    </div>
+
+    <div class="row">
+
+        <div class="field">
+            <label>السعر</label>
+            <input
+                id="listingPrice"
+                placeholder="مثال: 25,000 ريال"
+            >
+        </div>
+
+        <div class="field">
+            <label>الموقع</label>
+            <input
+                id="listingLocation"
+                placeholder="مثال: تعز - الحوبان"
+            >
+        </div>
+
+    </div>
+
+    <div class="field">
+        <label>الوصف والتفاصيل</label>
+        <textarea
+            id="listingDescription"
+            placeholder="اكتب جميع التفاصيل هنا..."
+        ></textarea>
+    </div>
+
+    <div class="field">
+
+        <label>📷 صور الإعلان</label>
+
+        <div class="file-area">
+
+            <strong>
+                اختر عدة صور في نفس الوقت
+            </strong>
+
+            <div class="muted">
+                يمكنك رفع حتى 15 صورة
+            </div>
+
+            <input
+                id="imageFiles"
+                type="file"
+                accept="image/*"
+                multiple
+            >
+
+        </div>
+
+        <div
+            id="imagePreview"
+            class="preview-grid"
+        ></div>
+
+    </div>
+
+    <div class="field">
+
+        <label>🎬 فيديو الإعلان</label>
+
+        <div class="file-area">
+
+            <strong>
+                فيديو واحد اختياري
+            </strong>
+
+            <div class="muted">
+                الحد الأقصى 100MB
+            </div>
+
+            <input
+                id="videoFile"
+                type="file"
+                accept="video/*"
+            >
+
+        </div>
+
+        <div
+            id="videoPreview"
+            class="preview-grid"
+        ></div>
+
+    </div>
+
+    <div class="field">
+
+        <label style="display:flex;gap:8px;align-items:center">
+
+            <input
+                id="listingPublished"
+                type="checkbox"
+                checked
+            >
+
+            عرض الإعلان للزوار
+
+        </label>
+
+    </div>
+
+    <div class="actions">
+
+        <button
+            class="primary"
+            onclick="saveListing()"
+        >
+            💾 حفظ الإعلان
+        </button>
+
+        <button
+            class="secondary"
+            onclick="resetForm()"
+        >
+            إلغاء
+        </button>
+
+    </div>
+
+</section>
+
+<!-- الإعلانات -->
+
+<section class="panel full">
+
+    <div class="panel-title">
+
+        <h2>🏷️ الإعلانات الحالية</h2>
+
+        <span
+            id="listingCount"
+            class="muted"
+        ></span>
+
+    </div>
+
+    <div
+        id="listingList"
+        class="listings"
+    ></div>
+
+</section>
+
+</div>
+
+</main>
+
+</section>
+
+<script>
+let token =
+    sessionStorage.getItem('exhibition_admin_token') || '';
+
+let data = {
+    settings:{},
+    categories:[],
+    listings:[]
+};
+
+let editingCategoryId = null;
+
+let existingImages = [];
+let existingVideo = '';
+
+function api(url, options = {}){
+
+    options.headers = {
+        ...(options.headers || {}),
+        'x-admin-token': token
+    };
+
+    return fetch(url, options);
+}
+
+function showStatus(message, type='ok'){
+
+    const box =
+        document.getElementById('status');
+
+    box.textContent = message;
+
+    box.className =
+        `status show ${type}`;
+
+    setTimeout(() => {
+        box.className = 'status';
+    }, 3500);
+}
+
+async function login(){
+
+    const password =
+        document.getElementById('password').value;
+
+    if(!password){
+        alert('اكتب كلمة المرور');
+        return;
+    }
+
+    const res =
+        await fetch('/api/admin-login',{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({password})
+        });
+
+    const result = await res.json();
+
+    if(!result.success){
+        alert(result.message || 'فشل الدخول');
+        return;
+    }
+
+    token = result.token;
+
+    sessionStorage.setItem(
+        'exhibition_admin_token',
+        token
+    );
+
+    showApp();
+
+    loadData();
+}
+
+function showApp(){
+
+    document.getElementById('loginPage')
+        .style.display = 'none';
+
+    document.getElementById('app')
+        .style.display = 'block';
+}
+
+function logout(){
+
+    sessionStorage.removeItem(
+        'exhibition_admin_token'
+    );
+
+    location.reload();
+}
+
+async function loadData(){
+
+    const res =
+        await fetch('/api/data');
+
+    data = await res.json();
+
+    fillSettings();
+    renderCategories();
+    renderCategorySelect();
+    renderListings();
+}
+
+function fillSettings(){
+
+    const s = data.settings || {};
+
+    document.getElementById('settingName').value =
+        s.name || '';
+
+    document.getElementById('settingDescription').value =
+        s.description || '';
+
+    document.getElementById('settingWhatsapp').value =
+        s.whatsapp || '';
+
+    document.getElementById('settingPhone').value =
+        s.phone || '';
+
+    document.getElementById('settingEmail').value =
+        s.email || '';
+
+    document.getElementById('settingWebsite').value =
+        s.website || '';
+}
+
+async function saveSettings(){
+
+    const body = {
+        name:
+            document.getElementById('settingName').value,
+
+        description:
+            document.getElementById('settingDescription').value,
+
+        whatsapp:
+            document.getElementById('settingWhatsapp').value,
+
+        phone:
+            document.getElementById('settingPhone').value,
+
+        email:
+            document.getElementById('settingEmail').value,
+
+        website:
+            document.getElementById('settingWebsite').value
+    };
+
+    const res =
+        await api('/api/settings',{
+            method:'PUT',
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify(body)
+        });
+
+    const result = await res.json();
+
+    if(!res.ok){
+        showStatus(
+            result.message || 'حدث خطأ',
+            'error'
+        );
+        return;
+    }
+
+    data.settings = result.settings;
+
+    showStatus('تم حفظ بيانات المعرض بنجاح');
+}
+
+function renderCategories(){
+
+    const box =
+        document.getElementById('categoryList');
+
+    box.innerHTML =
+        data.categories.map(category => `
+            <div class="category-item">
+
+                <div class="category-left">
+
+                    <span class="category-icon">
+                        ${escapeHtml(category.icon)}
+                    </span>
+
+                    <strong>
+                        ${escapeHtml(category.name)}
+                    </strong>
+
+                </div>
+
+                <div class="actions">
+
+                    <button
+                        class="secondary"
+                        onclick="editCategory('${category.id}')"
+                    >
+                        تعديل
+                    </button>
+
+                    <button
+                        class="danger"
+                        onclick="deleteCategory('${category.id}')"
+                    >
+                        حذف
+                    </button>
+
+                </div>
+
+            </div>
+        `).join('');
+}
+
+function renderCategorySelect(){
+
+    const select =
+        document.getElementById('listingCategory');
+
+    select.innerHTML =
+        `<option value="">اختر التصنيف</option>` +
+        data.categories.map(category => `
+            <option value="${category.id}">
+                ${escapeHtml(category.icon)}
+                ${escapeHtml(category.name)}
+            </option>
+        `).join('');
+}
+
+async function saveCategory(){
+
+    const name =
+        document.getElementById('categoryName')
+            .value.trim();
+
+    const icon =
+        document.getElementById('categoryIcon')
+            .value.trim() || '📦';
+
+    if(!name){
+        alert('اكتب اسم التصنيف');
+        return;
+    }
+
+    let url = '/api/categories';
+    let method = 'POST';
+
+    if(editingCategoryId){
+        url =
+            `/api/categories/${editingCategoryId}`;
+
+        method = 'PUT';
+    }
+
+    const res =
+        await api(url,{
+            method,
+            headers:{
+                'Content-Type':'application/json'
+            },
+            body:JSON.stringify({
+                name,
+                icon
+            })
+        });
+
+    const result = await res.json();
+
+    if(!res.ok){
+        showStatus(
+            result.message || 'حدث خطأ',
+            'error'
+        );
+        return;
+    }
+
+    document.getElementById('categoryName').value = '';
+    document.getElementById('categoryIcon').value = '';
+
+    editingCategoryId = null;
+
+    document.getElementById('cancelCategory')
+        .style.display = 'none';
+
+    await loadData();
+
+    showStatus('تم حفظ التصنيف');
+}
+
+function editCategory(id){
+
+    const category =
+        data.categories.find(x => x.id === id);
+
+    if(!category) return;
+
+    editingCategoryId = id;
+
+    document.getElementById('categoryName').value =
+        category.name;
+
+    document.getElementById('categoryIcon').value =
+        category.icon;
+
+    document.getElementById('cancelCategory')
+        .style.display = 'inline-block';
+}
+
+function cancelCategoryEdit(){
+
+    editingCategoryId = null;
+
+    document.getElementById('categoryName').value = '';
+    document.getElementById('categoryIcon').value = '';
+
+    document.getElementById('cancelCategory')
+        .style.display = 'none';
+}
+
+async function deleteCategory(id){
+
+    if(!confirm('هل تريد حذف هذا التصنيف؟')){
+        return;
+    }
+
+    const res =
+        await api(`/api/categories/${id}`,{
+            method:'DELETE'
+        });
+
+    const result = await res.json();
+
+    if(!res.ok){
+        alert(result.message || 'تعذر الحذف');
+        return;
+    }
+
+    await loadData();
+
+    showStatus('تم حذف التصنيف');
+}
+
+document.getElementById('imageFiles')
+    .addEventListener('change', previewImages);
+
+document.getElementById('videoFile')
+    .addEventListener('change', previewVideo);
+
+function previewImages(){
+
+    const box =
+        document.getElementById('imagePreview');
+
+    box.innerHTML = '';
+
+    const files =
+        [...document.getElementById('imageFiles').files];
+
+    files.forEach(file => {
+
+        const url =
+            URL.createObjectURL(file);
+
+        box.innerHTML += `
+            <div class="preview">
+                <img src="${url}">
+            </div>
+        `;
+    });
+}
+
+function previewVideo(){
+
+    const box =
+        document.getElementById('videoPreview');
+
+    box.innerHTML = '';
+
+    const file =
+        document.getElementById('videoFile').files[0];
+
+    if(!file) return;
+
+    const url =
+        URL.createObjectURL(file);
+
+    box.innerHTML = `
+        <div class="preview">
+            <video
+                src="${url}"
+                controls
+            ></video>
+        </div>
+    `;
+}
+
+function renderExistingImages(){
+
+    const box =
+        document.getElementById('imagePreview');
+
+    box.innerHTML = '';
+
+    existingImages.forEach((url,index) => {
+
+        box.innerHTML += `
+            <div class="preview">
+
+                <img src="${url}">
+
+                <button
+                    class="remove-preview"
+                    onclick="removeExistingImage(${index})"
+                >
+                    ×
+                </button>
+
+            </div>
+        `;
+    });
+}
+
+function removeExistingImage(index){
+
+    existingImages.splice(index,1);
+
+    renderExistingImages();
+}
+
+function renderExistingVideo(){
+
+    const box =
+        document.getElementById('videoPreview');
+
+    box.innerHTML = '';
+
+    if(!existingVideo) return;
+
+    box.innerHTML = `
+        <div class="preview">
+
+            <video
+                src="${existingVideo}"
+                controls
+            ></video>
+
+            <button
+                class="remove-preview"
+                onclick="removeExistingVideo()"
+            >
+                ×
+            </button>
+
+        </div>
+    `;
+}
+
+function removeExistingVideo(){
+
+    existingVideo = '';
+
+    renderExistingVideo();
+}
+
+async function saveListing(){
+
+    const title =
+        document.getElementById('listingTitle')
+            .value.trim();
+
+    const categoryId =
+        document.getElementById('listingCategory')
+            .value;
+
+    if(!title || !categoryId){
+
+        alert('اسم الإعلان والتصنيف مطلوبان');
+
+        return;
+    }
+
+    const id =
+        document.getElementById('listingId').value;
+
+    const formData = new FormData();
+
+    formData.append('title',title);
+    formData.append('categoryId',categoryId);
+
+    formData.append(
+        'price',
+        document.getElementById('listingPrice').value
+    );
+
+    formData.append(
+        'location',
+        document.getElementById('listingLocation').value
+    );
+
+    formData.append(
+        'description',
+        document.getElementById('listingDescription').value
+    );
+
+    formData.append(
+        'published',
+        document.getElementById('listingPublished').checked
+    );
+
+    formData.append(
+        'existingImages',
+        JSON.stringify(existingImages)
+    );
+
+    formData.append(
+        'existingVideo',
+        existingVideo
+    );
+
+    const images =
+        document.getElementById('imageFiles').files;
+
+    for(const file of images){
+        formData.append('images',file);
+    }
+
+    const video =
+        document.getElementById('videoFile').files[0];
+
+    if(video){
+        formData.append('video',video);
+    }
+
+    const url =
+        id
+        ? `/api/listings/${id}`
+        : '/api/listings';
+
+    const method =
+        id ? 'PUT' : 'POST';
+
+    showStatus(
+        'جاري حفظ الإعلان...',
+        'ok'
+    );
+
+    const res =
+        await api(url,{
+            method,
+            body:formData
+        });
+
+    const result = await res.json();
+
+    if(!res.ok){
+
+        showStatus(
+            result.message || 'تعذر حفظ الإعلان',
+            'error'
+        );
+
+        return;
+    }
+
+    resetForm();
+
+    await loadData();
+
+    showStatus(
+        id
+        ? 'تم تعديل الإعلان بنجاح'
+        : 'تم إضافة الإعلان بنجاح'
+    );
+}
+
+function editListing(id){
+
+    const listing =
+        data.listings.find(x => x.id === id);
+
+    if(!listing) return;
+
+    document.getElementById('formTitle').textContent =
+        '✏️ تعديل الإعلان';
+
+    document.getElementById('listingId').value =
+        listing.id;
+
+    document.getElementById('listingTitle').value =
+        listing.title || '';
+
+    document.getElementById('listingCategory').value =
+        listing.categoryId || '';
+
+    document.getElementById('listingPrice').value =
+        listing.price || '';
+
+    document.getElementById('listingLocation').value =
+        listing.location || '';
+
+    document.getElementById('listingDescription').value =
+        listing.description || '';
+
+    document.getElementById('listingPublished').checked =
+        listing.published !== false;
+
+    existingImages =
+        [...(listing.images || [])];
+
+    existingVideo =
+        listing.video || '';
+
+    document.getElementById('imageFiles').value = '';
+    document.getElementById('videoFile').value = '';
+
+    renderExistingImages();
+    renderExistingVideo();
+
+    window.scrollTo({
+        top:0,
+        behavior:'smooth'
+    });
+}
+
+async function deleteListing(id){
+
+    if(!confirm('هل تريد حذف الإعلان نهائياً؟')){
+        return;
+    }
+
+    const res =
+        await api(`/api/listings/${id}`,{
+            method:'DELETE'
+        });
+
+    const result = await res.json();
+
+    if(!res.ok){
+        alert(result.message || 'تعذر الحذف');
+        return;
+    }
+
+    await loadData();
+
+    showStatus('تم حذف الإعلان');
+}
+
+function resetForm(){
+
+    document.getElementById('formTitle').textContent =
+        '➕ إضافة إعلان جديد';
+
+    document.getElementById('listingId').value = '';
+
+    document.getElementById('listingTitle').value = '';
+
+    document.getElementById('listingCategory').value = '';
+
+    document.getElementById('listingPrice').value = '';
+
+    document.getElementById('listingLocation').value = '';
+
+    document.getElementById('listingDescription').value = '';
+
+    document.getElementById('listingPublished').checked =
+        true;
+
+    document.getElementById('imageFiles').value = '';
+
+    document.getElementById('videoFile').value = '';
+
+    existingImages = [];
+    existingVideo = '';
+
+    document.getElementById('imagePreview').innerHTML = '';
+    document.getElementById('videoPreview').innerHTML = '';
+}
+
+function renderListings(){
+
+    const box =
+        document.getElementById('listingList');
+
+    document.getElementById('listingCount')
+        .textContent =
+        `${data.listings.length} إعلان`;
+
+    if(!data.listings.length){
+
+        box.innerHTML = `
+            <div
+                style="
+                    grid-column:1/-1;
+                    text-align:center;
+                    padding:50px;
+                    color:#64748b
+                "
+            >
+                لا توجد إعلانات حتى الآن
+            </div>
+        `;
+
+        return;
+    }
+
+    box.innerHTML =
+        data.listings.map(listing => {
+
+            const category =
+                data.categories.find(
+                    x => x.id === listing.categoryId
+                );
+
+            const image =
+                listing.images?.[0];
+
+            return `
+                <div class="listing-card">
+
+                    <div class="listing-image">
+
+                        ${
+                            image
+                            ? `<img src="${image}">`
+                            : `
+                                <div
+                                    style="
+                                        height:100%;
+                                        display:grid;
+                                        place-items:center;
+                                        font-size:50px
+                                    "
+                                >
+                                    📦
+                                </div>
+                            `
+                        }
+
+                    </div>
+
+                    <div class="listing-info">
+
+                        <h3>
+                            ${escapeHtml(listing.title)}
+                        </h3>
+
+                        <div class="muted">
+                            ${
+                                category
+                                ? `${category.icon} ${escapeHtml(category.name)}`
+                                : ''
+                            }
+                        </div>
+
+                        ${
+                            listing.price
+                            ? `
+                            <div
+                                style="
+                                    color:#1e3a8a;
+                                    font-weight:900;
+                                    margin-top:8px
+                                "
+                            >
+                                ${escapeHtml(listing.price)}
+                            </div>
+                            `
+                            : ''
+                        }
+
+                        <div
+                            class="actions"
+                            style="margin-top:12px"
+                        >
+
+                            <button
+                                class="secondary"
+                                onclick="editListing('${listing.id}')"
+                            >
+                                تعديل
+                            </button>
+
+                            <button
+                                class="danger"
+                                onclick="deleteListing('${listing.id}')"
+                            >
+                                حذف
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+
+        }).join('');
+}
+
+function escapeHtml(value){
+
+    return String(value ?? '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+}
+
+if(token){
+    showApp();
+    loadData();
+}
+</script>
+
+</body>
+</html>

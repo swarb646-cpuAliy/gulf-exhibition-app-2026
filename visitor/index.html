@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+
+<script>
+(function () {
+  const base = location.pathname.startsWith('/exhibition')
+    ? '/exhibition' : '';
+
+  const originalFetch = window.fetch.bind(window);
+  window.fetch = function (input, options) {
+    if (typeof input === 'string' &&
+        input.startsWith('/') &&
+        !input.startsWith('//')) {
+      input = base + input;
+    }
+    return originalFetch(input, options);
+  };
+
+  const originalRegister =
+    navigator.serviceWorker &&
+    navigator.serviceWorker.register
+      ? navigator.serviceWorker.register.bind(navigator.serviceWorker)
+      : null;
+
+  if (originalRegister) {
+    navigator.serviceWorker.register = function (url, options) {
+      if (typeof url === 'string' && url.startsWith('/')) {
+        url = base + url;
+      }
+      return originalRegister(url, options);
+    };
+  }
+
+  function fixUrl(value) {
+    if (typeof value === 'string' &&
+        value.startsWith('/') &&
+        !value.startsWith('//')) {
+      return base + value;
+    }
+    return value;
+  }
+
+  function fixElements(root) {
+    if (root.nodeType !== 1) return;
+    const attrs = ['src', 'href'];
+    for (const attr of attrs) {
+      if (root.hasAttribute(attr)) {
+        const value = root.getAttribute(attr);
+        if (value && value.startsWith('/') &&
+            !value.startsWith('//')) {
+          root.setAttribute(attr, fixUrl(value));
+        }
+      }
+    }
+    root.querySelectorAll('[src^="/"],[href^="/"]').forEach(el => {
+      for (const attr of attrs) {
+        const value = el.getAttribute(attr);
+        if (value && value.startsWith('/') &&
+            !value.startsWith('//')) {
+          el.setAttribute(attr, fixUrl(value));
+        }
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    fixElements(document.documentElement);
+    new MutationObserver(records => {
+      for (const record of records) {
+        record.addedNodes.forEach(node => {
+          if (node.nodeType === 1) fixElements(node);
+        });
+      }
+    }).observe(document.documentElement, {
+      childList: true, subtree: true
+    });
+  });
+})();
+</script>
+
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+
+    <meta property="og:title" content="المعرض التفاعلي">
+    <meta property="og:description" content="المعرض التفاعلي | استكشف المعرض وتصفح المحتوى بسهولة">
+    <meta property="og:image" content="/og-image.jpg">
+    <meta property="og:type" content="website">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>المعرض التفاعلي</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap');
+
+*{
+    box-sizing:border-box;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    margin:0;
+    font-family:'Cairo',sans-serif;
+    background:#f5f7fb;
+    color:#172033;
+}
+
+button,
+input,
+textarea,
+select{
+    font-family:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.hero{
+    min-height:470px;
+    padding:35px 6% 70px;
+    position:relative;
+    overflow:hidden;
+    color:white;
+    background:
+        radial-gradient(circle at 15% 20%,rgba(255,255,255,.16),transparent 25%),
+        radial-gradient(circle at 85% 80%,rgba(255,255,255,.12),transparent 28%),
+        linear-gradient(135deg,#111827,#1e3a8a 55%,#0f766e);
+}
+
+.hero:after{
+    content:"";
+    position:absolute;
+    width:500px;
+    height:500px;
+    border-radius:50%;
+    border:80px solid rgba(255,255,255,.04);
+    left:-180px;
+    bottom:-300px;
+}
+
+.nav{
+    max-width:1250px;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:relative;
+    z-index:2;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-weight:900;
+    font-size:22px;
+}
+
+.logo-icon{
+    width:48px;
+    height:48px;
+    border-radius:16px;
+    display:grid;
+    place-items:center;
+    font-size:24px;
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(15px);
+}
+
+.admin-link{
+    color:white;
+    text-decoration:none;
+    border:1px solid rgba(255,255,255,.25);
+    padding:10px 17px;
+    border-radius:14px;
+    background:rgba(255,255,255,.08);
+    font-size:13px;
+}
+
+.hero-content{
+    max-width:1250px;
+    margin:75px auto 0;
+    position:relative;
+    z-index:2;
+}
+
+.badge{
+    display:inline-flex;
+    padding:8px 15px;
+    border-radius:50px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    font-size:13px;
+    margin-bottom:18px;
+}
+
+.hero h1{
+    margin:0;
+    font-size:clamp(34px,6vw,68px);
+    line-height:1.15;
+    font-weight:900;
+    max-width:850px;
+}
+
+.hero p{
+    color:rgba(255,255,255,.78);
+    max-width:700px;
+    font-size:17px;
+    line-height:2;
+    margin:20px 0 28px;
+}
+
+.search-box{
+    max-width:760px;
+    background:white;
+    border-radius:22px;
+    padding:7px;
+    display:flex;
+    box-shadow:0 20px 50px rgba(0,0,0,.2);
+}
+
+.search-box input{
+    border:0;
+    outline:0;
+    flex:1;
+    padding:16px;
+    font-size:15px;
+    color:#111827;
+    background:transparent;
+}
+
+.search-box button{
+    border:0;
+    background:#111827;
+    color:white;
+    border-radius:16px;
+    padding:0 25px;
+    font-weight:800;
+}
+
+.container{
+    max-width:1250px;
+    margin:auto;
+    padding:45px 20px;
+}
+
+.section-title{
+    display:flex;
+    align-items:end;
+    justify-content:space-between;
+    margin-bottom:22px;
+}
+
+.section-title h2{
+    margin:0;
+    font-size:26px;
+}
+
+.section-title span{
+    color:#64748b;
+    font-size:13px;
+}
+
+.categories{
+    display:grid;
+    grid-template-columns:repeat(6,1fr);
+    gap:14px;
+    margin-bottom:50px;
+}
+
+.category{
+    border:1px solid #e6eaf0;
+    background:white;
+    border-radius:22px;
+    padding:22px 10px;
+    text-align:center;
+    transition:.25s;
+    color:#1e293b;
+}
+
+.category:hover,
+.category.active{
+    transform:translateY(-5px);
+    border-color:#1e3a8a;
+    box-shadow:0 15px 35px rgba(30,58,138,.12);
+}
+
+.category-icon{
+    font-size:34px;
+    margin-bottom:9px;
+}
+
+.category-name{
+    font-size:13px;
+    font-weight:800;
+}
+
+.listings{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+}
+
+.card{
+    background:white;
+    border:1px solid #e8ecf2;
+    border-radius:25px;
+    overflow:hidden;
+    transition:.3s;
+    box-shadow:0 5px 20px rgba(15,23,42,.03);
+}
+
+.card:hover{
+    transform:translateY(-7px);
+    box-shadow:0 20px 45px rgba(15,23,42,.12);
+}
+
+.card-image{
+    height:240px;
+    background:#e8edf4;
+    position:relative;
+    overflow:hidden;
+}
+
+.card-image img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.4s;
+}
+
+.card:hover .card-image img{
+    transform:scale(1.05);
+}
+
+.no-image{
+    height:100%;
+    display:grid;
+    place-items:center;
+    font-size:60px;
+    color:#94a3b8;
+}
+
+.card-badge{
+    position:absolute;
+    top:14px;
+    right:14px;
+    background:rgba(15,23,42,.78);
+    backdrop-filter:blur(8px);
+    color:white;
+    padding:6px 11px;
+    border-radius:50px;
+    font-size:11px;
+}
+
+.video-badge{
+    position:absolute;
+    bottom:14px;
+    left:14px;
+    background:#fff;
+    color:#111827;
+    padding:6px 10px;
+    border-radius:10px;
+    font-size:11px;
+    font-weight:800;
+}
+
+.card-body{
+    padding:19px;
+}
+
+.card-title{
+    font-size:18px;
+    font-weight:900;
+    margin-bottom:8px;
+}
+
+.card-location{
+    color:#64748b;
+    font-size:13px;
+    margin-bottom:13px;
+}
+
+.card-price{
+    font-size:20px;
+    font-weight:900;
+    color:#1e3a8a;
+}
+
+.view-btn{
+    width:100%;
+    margin-top:16px;
+    border:0;
+    border-radius:14px;
+    padding:12px;
+    background:#eef2ff;
+    color:#1e3a8a;
+    font-weight:800;
+}
+
+.empty{
+    text-align:center;
+    padding:80px 20px;
+    color:#64748b;
+}
+
+.empty-icon{
+    font-size:60px;
+    margin-bottom:15px;
+}
+
+.footer{
+    background:#111827;
+    color:white;
+    margin-top:50px;
+    padding:40px 20px;
+}
+
+.footer-inner{
+    max-width:1250px;
+    margin:auto;
+    display:flex;
+    justify-content:space-between;
+    gap:30px;
+}
+
+.footer p{
+    color:#94a3b8;
+    font-size:13px;
+}
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(15,23,42,.78);
+    backdrop-filter:blur(8px);
+    padding:20px;
+    overflow:auto;
+}
+
+.modal.show{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.modal-box{
+    width:min(1000px,100%);
+    background:white;
+    border-radius:28px;
+    overflow:hidden;
+    position:relative;
+    animation:pop .25s ease;
+}
+
+@keyframes pop{
+    from{transform:scale(.95);opacity:0}
+    to{transform:scale(1);opacity:1}
+}
+
+.close{
+    position:absolute;
+    z-index:5;
+    top:14px;
+    left:14px;
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:rgba(15,23,42,.75);
+    color:white;
+    font-size:20px;
+}
+
+.gallery-main{
+    height:470px;
+    background:#111827;
+    position:relative;
+}
+
+.gallery-main img,
+.gallery-main video{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+.thumbs{
+    display:flex;
+    gap:8px;
+    padding:10px;
+    overflow:auto;
+    background:#f8fafc;
+}
+
+.thumb{
+    width:75px;
+    height:60px;
+    flex:none;
+    object-fit:cover;
+    border-radius:10px;
+    cursor:pointer;
+    border:2px solid transparent;
+}
+
+.thumb.active{
+    border-color:#1e3a8a;
+}
+
+.modal-info{
+    padding:25px;
+}
+
+.modal-info h2{
+    margin:0 0 8px;
+    font-size:28px;
+}
+
+.modal-meta{
+    color:#64748b;
+    font-size:14px;
+    margin-bottom:15px;
+}
+
+.modal-price{
+    color:#1e3a8a;
+    font-size:25px;
+    font-weight:900;
+    margin-bottom:15px;
+}
+
+.modal-description{
+    line-height:2;
+    color:#475569;
+    white-space:pre-line;
+}
+
+.contact-title{
+    margin-top:25px;
+    font-size:16px;
+    font-weight:900;
+}
+
+.contact-buttons{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:12px;
+}
+
+.contact-btn{
+    text-decoration:none;
+    border:0;
+    padding:12px 18px;
+    border-radius:14px;
+    font-weight:800;
+    font-size:13px;
+    background:#eef2ff;
+    color:#1e3a8a;
+}
+
+@media(max-width:900px){
+    .categories{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .listings{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:600px){
+    .hero{
+        min-height:520px;
+        padding-left:20px;
+        padding-right:20px;
+    }
+
+    .hero-content{
+        margin-top:60px;
+    }
+
+    .search-box button{
+        padding:0 17px;
+    }
+
+    .categories{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .listings{
+        grid-template-columns:1fr;
+    }
+
+    .footer-inner{
+        flex-direction:column;
+    }
+
+    .gallery-main{
+        height:300px;
+    }
+
+    .modal-info h2{
+        font-size:22px;
+    }
+}
+</style>
+
+<style>
+.gallery-lightbox-close,
+.gallery-lightbox-nav,
+.gallery-lightbox-download{
+    background:#dc2626 !important;
+    color:#fff !important;
+    border:2px solid #fff !important;
+    box-shadow:0 4px 15px rgba(0,0,0,.7) !important;
+}
+
+.gallery-lightbox-close{
+    font-weight:900 !important;
+}
+
+.gallery-lightbox-nav{
+    font-weight:900 !important;
+}
+
+.gallery-lightbox-download{
+    font-weight:900 !important;
+}
+</style>
+
+
+<style>
+.gallery-lightbox{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    background:rgba(0,0,0,.94);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:10px;
+}
+
+.gallery-lightbox.show{
+    display:flex !important;
+}
+
+.gallery-lightbox-content{
+    position:relative;
+    width:min(94vw,900px);
+    height:min(88vh,760px);
+    background:#111827;
+    border:3px solid #dc2626;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    box-shadow:0 10px 40px rgba(0,0,0,.8);
+}
+
+.gallery-lightbox img{
+    max-width:calc(100% - 150px);
+    max-height:calc(100% - 150px);
+    object-fit:contain;
+    border-radius:10px;
+    cursor:zoom-out;
+}
+
+.gallery-lightbox-close,
+.gallery-lightbox-nav,
+.gallery-lightbox-download{
+    position:absolute;
+    z-index:10;
+    background:#dc2626 !important;
+    color:#fff !important;
+    border:2px solid #fff !important;
+    box-shadow:0 4px 15px rgba(0,0,0,.7);
+    font-weight:900;
+    cursor:pointer;
+}
+
+.gallery-lightbox-close{
+    top:12px;
+    right:12px;
+    width:55px;
+    height:55px;
+    border-radius:12px;
+    font-size:34px;
+}
+
+.gallery-lightbox-nav{
+    top:50%;
+    transform:translateY(-50%);
+    width:60px;
+    height:60px;
+    border-radius:14px;
+    font-size:40px;
+}
+
+.gallery-lightbox-prev{
+    left:12px;
+}
+
+.gallery-lightbox-next{
+    right:12px;
+}
+
+.gallery-lightbox-download{
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:13px 25px;
+    border-radius:12px;
+    font-size:17px;
+}
+
+#galleryMain img{
+    cursor:zoom-in;
+}
+
+@media(max-width:600px){
+    .gallery-lightbox{
+        padding:8px;
+    }
+
+    .gallery-lightbox-content{
+        width:94vw;
+        height:82vh;
+        border-radius:16px;
+    }
+
+    .gallery-lightbox img{
+        max-width:calc(100% - 110px);
+        max-height:calc(100% - 130px);
+    }
+
+    .gallery-lightbox-nav{
+        width:46px;
+        height:46px;
+        font-size:30px;
+    }
+
+    .gallery-lightbox-close{
+        width:46px;
+        height:46px;
+        font-size:28px;
+    }
+
+    .gallery-lightbox-download{
+        bottom:12px;
+        padding:10px 18px;
+        font-size:15px;
+    }
+}
+</style>
+
+
+<style>
+#galleryMain video{
+    display:block;
+    width:100%;
+    height:100%;
+    max-width:100%;
+    max-height:100%;
+    object-fit:contain;
+    object-position:center;
+    margin:0;
+    border-radius:10px;
+}
+</style>
+
+
+<style>
+/* جعل نافذة تفاصيل الإعلان داخل الشاشة مع فراغ من الأعلى */
+#modal{
+    align-items:flex-start !important;
+    justify-content:center !important;
+    padding:70px 12px 30px !important;
+    box-sizing:border-box;
+    overflow-y:auto !important;
+}
+
+#modal .modal-box{
+    margin:0 auto !important;
+    max-height:calc(100vh - 100px) !important;
+    overflow-y:auto !important;
+    border-radius:18px !important;
+}
+
+@media(max-width:600px){
+    #modal{
+        padding:60px 10px 25px !important;
+    }
+
+    #modal .modal-box{
+        width:100% !important;
+        max-height:calc(100vh - 85px) !important;
+        border-radius:18px !important;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<section class="hero">
+
+    <nav class="nav">
+        <div class="logo">
+            <div class="logo-icon" style="color:#dc2626;">✦</div>
+            <span id="siteName" style="color:#dc2626;">معرض الخليج</span>
+        </div>
+
+        
+    </nav>
+
+    <div class="hero-content">
+
+        <div class="badge">
+            ✦ اكتشف • استعرض • تواصل
+        </div>
+
+        <h1>
+            <span style="color:#16a34a;font-weight:800;">اكتشف ما تبحث عنه<br>
+            في مكان واحد</span>
+        </h1>
+
+        
+<style>
+#siteDescription{
+    max-width:760px;
+    max-height:175px;
+    overflow-y:auto;
+    margin:14px auto 18px;
+    padding:16px 18px;
+    box-sizing:border-box;
+    background:rgba(255,255,255,.96);
+    border:1px solid rgba(148,163,184,.28);
+    border-radius:18px;
+    box-shadow:0 8px 28px rgba(15,23,42,.08);
+    color:#475569;
+    font-size:15px;
+    line-height:2;
+    text-align:right;
+    white-space:pre-wrap;
+    scrollbar-width:thin;
+    scrollbar-color:#94a3b8 transparent;
+}
+
+#siteDescription::-webkit-scrollbar{
+    width:6px;
+}
+
+#siteDescription::-webkit-scrollbar-track{
+    background:transparent;
+}
+
+#siteDescription::-webkit-scrollbar-thumb{
+    background:#94a3b8;
+    border-radius:10px;
+}
+
+@media(max-width:600px){
+    #siteDescription{
+        max-height:145px;
+        margin:12px 10px 16px;
+        padding:13px 14px;
+        font-size:14px;
+        line-height:1.9;
+        border-radius:15px;
+    }
+}
+</style>
+
+<p id="siteDescription">
+            وجهتك لاكتشاف أفضل العروض والمنتجات بطريقة سهلة وتفاعلية.
+        </p>
+
+        <div class="search-box">
+            <input
+                id="searchInput"
+                type="search"
+                placeholder="ابحث عن عقار، سيارة، جوال، أثاث..."
+            >
+
+            <button onclick="renderListings()">
+                🔍 بحث
+            </button>
+        </div>
+
+    </div>
+</section>
+
+<main class="container">
+
+    <div class="section-title">
+        <h2>استكشف الأقسام</h2>
+        <span id="countText"></span>
+    </div>
+
+    
+<div id="announcementBar" style="display:none;">
+    <div id="announcementText"></div>
+</div>
+
+<style>
+#announcementBar{
+    width:100%;
+    overflow:hidden;
+    background:linear-gradient(90deg,#111827,#1e293b);
+    color:#fff;
+    border-radius:12px;
+    margin:12px 0 18px;
+    padding:10px 0;
+    box-sizing:border-box;
+}
+
+#announcementText{
+    display:inline-block;
+    white-space:nowrap;
+    padding-left:100%;
+    animation:announcementMove 45s linear infinite;
+    font-size:15px;
+    font-weight:700;
+    color:#ff0000;
+}
+
+@keyframes announcementMove{
+    from{
+        transform:translateX(-100%);
+    }
+    to{
+        transform:translateX(100%);
+    }
+}
+</style>
+
+<div id="categories" class="categories"></div>
+
+    <div class="section-title">
+        <h2>أحدث المعروضات</h2>
+        <span>اكتشف آخر الإضافات</span>
+    </div>
+
+    <div id="listings" class="listings"></div>
+
+</main>
+
+<footer class="footer">
+    <div class="footer-inner">
+       
+
+        <div>
+            <p>© جميع الحقوق محفوظة</p>
+        </div>
+    </div>
+</footer>
+
+<div id="modal" class="modal" onclick="closeOutside(event)">
+    <div class="modal-box">
+
+        <button class="close" onclick="closeModal()">×</button>
+
+        <div id="galleryMain" class="gallery-main"></div>
+
+        <div id="thumbs" class="thumbs"></div>
+
+        <div class="modal-info">
+
+            <h2 id="modalTitle"></h2>
+
+            <div id="modalMeta" class="modal-meta"></div>
+
+            <div id="modalPrice" class="modal-price"></div>
+
+            <div id="modalDescription" class="modal-description"></div>
+
+            <div class="contact-title">
+                📞 تواصل مع المدير
+            </div>
+
+            <div id="contactButtons" class="contact-buttons"></div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+let appData = {
+    settings:{},
+    categories:[],
+    listings:[]
+};
+
+let activeCategory = 'all';
+
+async function loadData(){
+    try{
+        const res = await fetch('/api/data');
+        appData = await res.json();
+
+        document.title =
+            appData.settings.name || 'المعرض التفاعلي';
+
+        document.getElementById('siteName').textContent =
+            appData.settings.name || 'المعرض التفاعلي';
+
+        document.getElementById('siteDescription').textContent =
+            appData.settings.description || '';
+
+        renderCategories();
+        renderListings();
+        renderFloatingSocialButtons();
+
+        const announcementBar =
+            document.getElementById('announcementBar');
+
+        const announcementText =
+            document.getElementById('announcementText');
+
+        const announcement =
+            String(appData.settings.announcement || '').trim();
+
+        if(announcement){
+            announcementText.textContent = announcement;
+            announcementBar.style.display = 'block';
+        }else{
+            announcementBar.style.display = 'none';
+        }
+
+    }catch(err){
+        console.error(err);
+    }
+}
+
+function renderCategories(){
+
+    const box = document.getElementById('categories');
+
+    box.innerHTML = '';
+
+    const all = document.createElement('button');
+
+    all.className =
+        'category ' +
+        (activeCategory === 'all' ? 'active' : '');
+
+    all.innerHTML = `
+        <div class="category-icon">✨</div>
+        <div class="category-name">الكل</div>
+    `;
+
+    all.onclick = () => {
+        activeCategory = 'all';
+        renderCategories();
+        renderListings();
+    };
+
+    box.appendChild(all);
+
+    appData.categories.forEach(category => {
+
+        const btn = document.createElement('button');
+
+        btn.className =
+            'category ' +
+            (activeCategory === category.id ? 'active' : '');
+
+        btn.innerHTML = `
+            <div class="category-icon">
+                ${escapeHtml(category.icon)}
+            </div>
+
+            <div class="category-name">
+                ${escapeHtml(category.name)}
+            </div>
+        `;
+
+        btn.onclick = () => {
+            activeCategory = category.id;
+            renderCategories();
+            renderListings();
+        };
+
+        box.appendChild(btn);
+    });
+}
+
+function renderListings(){
+
+    const box = document.getElementById('listings');
+
+    const search =
+        document.getElementById('searchInput')
+            .value
+            .trim()
+            .toLowerCase();
+
+    let listings = appData.listings.filter(
+        listing => listing.published !== false
+    );
+
+    if(activeCategory !== 'all'){
+        listings = listings.filter(
+            x => String(x.categoryId) === String(activeCategory)
+        );
+    }
+
+    if(search){
+        listings = listings.filter(x => {
+
+            const category =
+                getCategory(x.categoryId)?.name || '';
+
+            return (
+                x.title +
+                ' ' +
+                x.description +
+                ' ' +
+                x.location +
+                ' ' +
+                category
+            ).toLowerCase().includes(search);
+        });
+    }
+
+    document.getElementById('countText').textContent =
+        `${listings.length} إعلان`;
+
+    if(!listings.length){
+
+        box.innerHTML = `
+            <div class="empty" style="grid-column:1/-1">
+                <div class="empty-icon">🔎</div>
+                <h3>لا توجد نتائج</h3>
+                <p>جرّب البحث بكلمة أخرى أو اختر قسماً مختلفاً.</p>
+            </div>
+        `;
+
+        return;
+    }
+
+    box.innerHTML = listings.map(listing => {
+
+        const category =
+            getCategory(listing.categoryId);
+
+        const image =
+            listing.images?.[0];
+
+        return `
+            <article class="card">
+
+                <div class="card-image">
+
+                    ${
+                        image
+                        ? `<img src="${image}" alt="" loading="lazy" decoding="async">`
+                        : `<div class="no-image">📦</div>`
+                    }
+
+                    ${
+                        category
+                        ? `
+                        <div class="card-badge">
+                            ${escapeHtml(category.icon)}
+                            ${escapeHtml(category.name)}
+                        </div>
+                        `
+                        : ''
+                    }
+
+                    ${
+                        listing.video
+                        ? `<div class="video-badge">▶ فيديو</div>`
+                        : ''
+                    }
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="card-title">
+                        ${escapeHtml(listing.title)}
+                    </div>
+
+                    ${
+                        listing.location
+                        ? `
+                        <div class="card-location">
+                            📍 ${escapeHtml(listing.location)}
+                        </div>
+                        `
+                        : ''
+                    }
+
+                    ${
+                        listing.price
+                        ? `
+                        <div class="card-price">
+                            ${escapeHtml(listing.price)}
+                        </div>
+                        `
+                        : ''
+                    }
+
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <button
+                            class="view-btn"
+                            style="flex:1"
+                            onclick="openListing('${listing.id}')"
+                        >
+                            عرض التفاصيل ←
+                        </button>
+
+                        ${
+                            listing.whatsapp
+                            ? `<a
+                                href="https://wa.me/${String(listing.whatsapp).replace(/\D/g,'')}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onclick="event.stopPropagation()"
+                                aria-label="واتساب صاحب الإعلان"
+                                title="واتساب صاحب الإعلان"
+                                style="display:flex;align-items:center;justify-content:center;background:#25D366;color:white;border-radius:10px;padding:0 14px;text-decoration:none;font-size:22px"
+                            ><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.82 11.82 0 0 0 12.04 0C5.42 0 .04 5.38.04 12c0 2.12.56 4.11 1.53 5.83L0 24l6.34-1.52A11.94 11.94 0 0 0 12.04 24C18.66 24 24 18.62 24 12c0-3.2-1.25-6.22-3.48-8.52ZM12.04 21.9a9.9 9.9 0 0 1-5.04-1.38l-.36-.21-3.76.9.95-3.66-.24-.38A9.88 9.88 0 1 1 12.04 21.9Zm5.43-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.27-.47-2.42-1.5-.9-.8-1.5-1.78-1.68-2.08-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.03-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.48-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.87 1.22 3.07c.15.2 2.1 3.2 5.08 4.48.71.3 1.26.49 1.69.62.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.3.17-1.42-.07-.13-.27-.2-.57-.35Z"/></svg></a>`
+                            : ''
+                        }
+                    </div>
+
+                </div>
+
+            </article>
+        `;
+
+    }).join('');
+}
+
+function openListing(id){
+
+    const listing =
+        appData.listings.find(x => x.id === id);
+
+    if(!listing) return;
+
+    document.getElementById('modalTitle').textContent =
+        listing.title;
+
+    const category =
+        getCategory(listing.categoryId);
+
+    document.getElementById('modalMeta').textContent =
+        [
+            category
+                ? `${category.icon} ${category.name}`
+                : '',
+            listing.location
+                ? `📍 ${listing.location}`
+                : ''
+        ]
+        .filter(Boolean)
+        .join('  •  ');
+
+    document.getElementById('modalPrice').textContent =
+        listing.price || '';
+
+    document.getElementById('modalDescription').textContent =
+        listing.description || 'لا توجد تفاصيل إضافية.';
+
+    renderGallery(listing);
+
+    renderContacts(listing);
+
+    document.getElementById('modal').classList.add('show');
+
+    document.body.style.overflow = 'hidden';
+}
+
+function renderGallery(listing){
+
+    const main =
+        document.getElementById('galleryMain');
+
+    const thumbs =
+        document.getElementById('thumbs');
+
+    window.currentGalleryImages = listing.images || [];
+
+    const media = [
+        ...(listing.images || []).map(url => ({
+            type:'image',
+            url
+        })),
+        ...(listing.video
+            ? [{
+                type:'video',
+                url:listing.video
+            }]
+            : [])
+    ];
+
+    if(!media.length){
+
+        main.innerHTML = `
+            <div class="no-image">
+                📦
+            </div>
+        `;
+
+        thumbs.innerHTML = '';
+
+        return;
+    }
+
+    function showMedia(index){
+
+        const item = media[index];
+
+        if(item.type === 'video'){
+
+            main.innerHTML = `
+                <div style="
+                    width:100%;
+                    height:100%;
+                    min-height:300px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    background:#000;
+                    border-radius:10px;
+                    overflow:hidden;
+                ">
+                    <video
+                        src="${item.url}"
+                        controls
+                        playsinline
+                        preload="metadata"
+                        style="
+                            width:100%;
+                            height:100%;
+                            max-width:100%;
+                            max-height:100%;
+                            object-fit:contain;
+                            display:block;
+                            background:#000;
+                        "
+                    ></video>
+                </div>
+            `;
+
+        }else{
+
+            main.innerHTML = `
+                <img
+                    src="${item.url}"
+                    alt=""
+                    onclick="openGalleryLightbox(${index})"
+                >
+            `;
+        }
+
+        [...thumbs.children].forEach(
+            (el,i) => el.classList.toggle(
+                'active',
+                i === index
+            )
+        );
+    }
+
+    thumbs.innerHTML = media.map(
+        (item,index) => {
+
+            if(item.type === 'video'){
+                return `
+                    <div
+                        class="thumb"
+                        style="
+                            display:grid;
+                            place-items:center;
+                            background:#111827;
+                            color:white;
+                            font-size:22px;
+                        "
+                        onclick="window.galleryShow(${index})"
+                    >
+                        ▶
+                    </div>
+                `;
+            }
+
+            return `
+                <img
+                    class="thumb"
+                    src="${item.url}"
+                    onclick="window.galleryShow(${index})"
+                    alt=""
+                >
+            `;
+        }
+    ).join('');
+
+    window.galleryShow = showMedia;
+
+    showMedia(0);
+}
+
+
+let galleryLightboxIndex = 0;
+let galleryLightboxImages = [];
+
+function openGalleryLightbox(index){
+
+    galleryLightboxImages =
+        window.currentGalleryImages || [];
+
+    if(!galleryLightboxImages.length) return;
+
+    galleryLightboxIndex = index;
+
+    updateGalleryLightbox();
+
+    document
+        .getElementById('galleryLightbox')
+        .classList.add('show');
+
+    document.body.style.overflow = 'hidden';
+}
+
+function updateGalleryLightbox(){
+
+    const img =
+        document.getElementById('galleryLightboxImage');
+
+    const url =
+        galleryLightboxImages[galleryLightboxIndex];
+
+    if(url){
+        img.src = url;
+    }
+}
+
+function closeGalleryLightbox(){
+
+    document
+        .getElementById('galleryLightbox')
+        .classList.remove('show');
+
+    document.body.style.overflow = '';
+}
+
+function galleryLightboxNext(){
+
+    if(!galleryLightboxImages.length) return;
+
+    galleryLightboxIndex =
+        (galleryLightboxIndex + 1) %
+        galleryLightboxImages.length;
+
+    updateGalleryLightbox();
+}
+
+function galleryLightboxPrev(){
+
+    if(!galleryLightboxImages.length) return;
+
+    galleryLightboxIndex =
+        (galleryLightboxIndex - 1 +
+        galleryLightboxImages.length) %
+        galleryLightboxImages.length;
+
+    updateGalleryLightbox();
+}
+
+function downloadGalleryImage(){
+
+    const url =
+        galleryLightboxImages[galleryLightboxIndex];
+
+    if(!url) return;
+
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = 'صورة-الإعلان.jpg';
+
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+}
+
+
+function renderFloatingSocialButtons(){
+
+    const box =
+        document.getElementById('floatingSocialButtons');
+
+    if(!box) return;
+
+    const settings =
+        appData.settings || {};
+
+    const buttons = [];
+
+    if(settings.whatsapp){
+
+        const number =
+            String(settings.whatsapp).replace(/\D/g,'');
+
+        if(number){
+            buttons.push(`
+                <a
+                    class="floating-social-btn floating-whatsapp"
+                    href="https://wa.me/${number}"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="واتساب"
+                    title="واتساب"
+                ><svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
+    <circle cx="16" cy="16" r="15" fill="white"/>
+    <path fill="#25D366" d="M16 6.2A9.8 9.8 0 0 0 7.7 21.1L6.5 25.5l4.5-1.2A9.8 9.8 0 1 0 16 6.2Zm0 17.8a8 8 0 0 1-4.1-1.1l-.3-.2-2.7.7.7-2.6-.2-.3A8 8 0 1 1 16 24Zm4.4-5.9c-.2-.1-1.3-.6-1.5-.7-.2-.1-.4-.1-.5.1-.2.2-.6.7-.7.8-.1.2-.3.2-.5.1-1.4-.7-2.3-1.3-3.2-2.8-.2-.3.2-.3.6-1.1.1-.2.1-.3 0-.5l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.4c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.1s.9 2.4 1 2.6c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.2.7 3 .6.5-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1-.1-.1-.3-.2-.5-.3Z"/>
+</svg></a>
+            `);
+        }
+    }
+
+    if(settings.x){
+
+        let xUrl =
+            String(settings.x).trim();
+
+        if(xUrl){
+
+            if(!/^https?:\/\//i.test(xUrl)){
+                xUrl = 'https://' + xUrl;
+            }
+
+            buttons.push(`
+                <a
+                    class="floating-social-btn floating-x"
+                    href="${escapeAttr(xUrl)}"
+                    target="_blank"
+                    rel="noopener"
+                    aria-label="حساب X"
+                    title="X"
+                >𝕏</a>
+            `);
+        }
+    }
+
+    box.innerHTML = buttons.join('');
+}
+
+function renderContacts(listing){
+
+    const box =
+        document.getElementById('contactButtons');
+
+    const settings =
+        appData.settings || {};
+
+    const buttons = [];
+
+    const whatsappNumber =
+        listing?.whatsapp || settings.whatsapp || '';
+
+    if(whatsappNumber){
+
+        const number =
+            String(whatsappNumber).replace(/\D/g,'');
+
+        if(number){
+
+            const text =
+                encodeURIComponent(
+                    'السلام عليكم، أود الاستفسار عن أحد المعروضات في المعرض.'
+                );
+
+            buttons.push(`
+                <a
+                    class="contact-btn"
+                    href="https://wa.me/${number}?text=${text}"
+                    target="_blank"
+                    rel="noopener"
+                >
+                    💬 واتساب
+                </a>
+            `);
+        }
+    }
+
+    if(settings.phone){
+
+        buttons.push(`
+            <a
+                class="contact-btn"
+                href="tel:${escapeAttr(settings.phone)}"
+            >
+                📞 اتصال
+            </a>
+        `);
+    }
+
+    if(settings.email){
+
+        buttons.push(`
+            <a
+                class="contact-btn"
+                href="mailto:${escapeAttr(settings.email)}"
+            >
+                ✉️ البريد
+            </a>
+        `);
+    }
+
+    if(settings.website){
+
+        let website =
+            settings.website.trim();
+
+        if(!/^https?:\/\//i.test(website)){
+            website = 'https://' + website;
+        }
+
+        buttons.push(`
+            <a
+                class="contact-btn"
+                href="${escapeAttr(website)}"
+                target="_blank"
+                rel="noopener"
+            >
+                🌐 الموقع
+            </a>
+        `);
+    }
+
+    box.innerHTML =
+        buttons.length
+        ? buttons.join('')
+        : `
+            <span style="color:#64748b;font-size:13px">
+                لم يتم إضافة وسائل التواصل بعد.
+            </span>
+        `;
+
+    renderFloatingSocialButtons();
+}
+
+function closeModal(){
+
+    document.getElementById('modal')
+        .classList.remove('show');
+
+    document.body.style.overflow = '';
+}
+
+function closeOutside(event){
+
+    if(event.target.id === 'modal'){
+        closeModal();
+    }
+}
+
+function getCategory(id){
+    return appData.categories.find(
+        x => x.id === id
+    );
+}
+
+function escapeHtml(value){
+
+    return String(value ?? '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+}
+
+function escapeAttr(value){
+    return escapeHtml(value);
+}
+
+document.getElementById('searchInput')
+    .addEventListener('input', renderListings);
+
+const searchButton =
+    document.querySelector('.search-box button');
+
+if(searchButton){
+    searchButton.addEventListener('click', function(e){
+        e.preventDefault();
+        renderListings();
+
+        const listings =
+            document.getElementById('listings');
+
+        if(listings){
+            listings.scrollIntoView({
+                behavior:'smooth',
+                block:'start'
+            });
+        }
+    });
+}
+
+loadData();
+</script>
+
+
+<div id="galleryLightbox" class="gallery-lightbox">
+    <div class="gallery-lightbox-content">
+
+        <button
+            class="gallery-lightbox-close"
+            onclick="closeGalleryLightbox()"
+        >×</button>
+
+        <button
+            class="gallery-lightbox-nav gallery-lightbox-prev"
+            onclick="galleryLightboxPrev()"
+        >‹</button>
+
+        <img id="galleryLightboxImage" src="" alt="">
+
+        <button
+            class="gallery-lightbox-nav gallery-lightbox-next"
+            onclick="galleryLightboxNext()"
+        >›</button>
+
+        <button
+            class="gallery-lightbox-download"
+            onclick="downloadGalleryImage()"
+        >⬇️ تنزيل الصورة</button>
+
+    </div>
+</div>
+
+
+<!-- أزرار التواصل العائمة -->
+<div id="floatingSocialButtons"></div>
+
+<style>
+#floatingSocialButtons{
+    position:fixed;
+    right:16px;
+    bottom:16px;
+    z-index:9990;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.floating-social-btn{
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-decoration:none;
+    color:#fff !important;
+    font-size:25px;
+    font-weight:900;
+    box-shadow:0 5px 18px rgba(0,0,0,.28);
+    border:2px solid rgba(255,255,255,.9);
+}
+
+.floating-whatsapp{
+    background:#25D366;
+}
+
+.floating-x{
+    background:#000;
+}
+
+@media(max-width:600px){
+    #floatingSocialButtons{
+        right:12px;
+        bottom:12px;
+        gap:8px;
+    }
+
+    .floating-social-btn{
+        width:48px;
+        height:48px;
+        font-size:22px;
+    }
+}
+</style>
+
+
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+</script>
+
+
+<style>
+#install-app-banner {
+    display:none;
+    position:fixed;
+    bottom:18px;
+    left:18px;
+    right:18px;
+    z-index:99999;
+    background:#0f172a;
+    color:#fff;
+    padding:14px 16px;
+    border-radius:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.25);
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    font-family:inherit;
+}
+#install-app-banner button {
+    border:0;
+    border-radius:10px;
+    padding:9px 14px;
+    background:#fff;
+    color:#0f172a;
+    font-weight:bold;
+    cursor:pointer;
+}
+#install-app-close {
+    background:transparent !important;
+    color:#fff !important;
+    padding:4px 8px !important;
+}
+</style>
+
+<div id="install-app-banner">
+    <div>📱 ثبّت المعرض على شاشتك الرئيسية للوصول إليه بسرعة</div>
+    <div style="display:flex;gap:6px;align-items:center;">
+        <button id="install-app-btn">تثبيت</button>
+        <button id="install-app-close">×</button>
+    </div>
+</div>
+
+<script>
+let deferredInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+
+    const banner = document.getElementById('install-app-banner');
+    if (banner) banner.style.display = 'flex';
+});
+
+document.getElementById('install-app-btn')?.addEventListener('click', async () => {
+    if (!deferredInstallPrompt) return;
+
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+
+    deferredInstallPrompt = null;
+
+    const banner = document.getElementById('install-app-banner');
+    if (banner) banner.style.display = 'none';
+});
+
+document.getElementById('install-app-close')?.addEventListener('click', () => {
+    const banner = document.getElementById('install-app-banner');
+    if (banner) banner.style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+    const banner = document.getElementById('install-app-banner');
+    if (banner) banner.style.display = 'none';
+});
+</script>
+
+</body>
+</html>
