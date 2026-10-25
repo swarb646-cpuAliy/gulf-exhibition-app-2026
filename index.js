@@ -1205,9 +1205,6 @@ async function startServer() {
                 `  Admin: http://127.0.0.1:${PORT}/admin`
             );
             console.log(
-                '  Admin password: 123456'
-            );
-            console.log(
                 `  Firebase: ${
                     firebaseEnabled
                         ? 'ENABLED'
